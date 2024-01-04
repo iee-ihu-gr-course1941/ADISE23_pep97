@@ -1,0 +1,7 @@
+# Alias /~asidirop/Lectures-Chess1/v1/  /~asidirop/Lectures-Chess1/chess.php/
+<Limit GET POST PUT OPTIONS>
+    Require all granted
+</Limit>
+<LimitExcept GET POST PUT OPTIONS>
+    Require all denied
+</LimitExcept>

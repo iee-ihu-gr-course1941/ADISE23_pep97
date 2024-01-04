@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS user;
 
 CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    username char(20) NOT NULL,
+    username char(20) NOT NULL UNIQUE,
     password char(20) NOT NULL
 );
 
