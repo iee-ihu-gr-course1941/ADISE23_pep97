@@ -220,16 +220,52 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
     $stmt->execute();
 }
 
-function getBoardStatus($db, $user_id) {
+function markPlayerReady($db, $user_id) {
+    global $GAME_STATUS;
+
     $active_game = getActiveGame($db, $user_id);
 
     if (!$active_game) {
         return null;
     }
 
+    $placements = getShipPlacements($db, $user_id);
+
+    if (sizeof($placements) < 5) {
+        return null;
+    }
+
+    if ($active_game['player_1'] == $user_id) {
+        $sql = "UPDATE game_session SET player_1_ready = 1 WHERE id = ?";
+    } else {
+        $sql = "UPDATE game_session SET player_2_ready = 1 WHERE id = ?";
+    }
 
 
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param('s', $active_game['id']);
+    $result = $stmt->execute();
 
+    $active_game = getActiveGame($db, $user_id);
+    if ($active_game['player_1_ready'] == 1 && $active_game['player_2_ready'] == 1) {
+        $stmt = $db->prepare("UPDATE game_session SET game_phase = ? WHERE id = ?");
+        $stmt->bind_param('ss', $GAME_STATUS['started'], $active_game['id']);
+        $stmt->execute();
+    }
+
+    return $result;
+}
+
+function start_game($db, $user_id) {
+
+}
+
+function getBoardStatus($db, $user_id) {
+    $active_game = getActiveGame($db, $user_id);
+
+    if (!$active_game) {
+        return null;
+    }
 }
 
 ?>
