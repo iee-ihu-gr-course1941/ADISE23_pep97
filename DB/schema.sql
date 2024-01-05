@@ -30,7 +30,8 @@ CREATE TABLE ship_placement (
     orientation INT NOT NULL,
     x INT NOT NULL,
     y INT NOT NULL,
-    FOREIGN KEY (session) REFERENCES game_session(id)
+    FOREIGN KEY (session) REFERENCES game_session(id),
+    FOREIGN KEY (player) REFERENCES user(id)
 );
 
 CREATE TABLE round_action (

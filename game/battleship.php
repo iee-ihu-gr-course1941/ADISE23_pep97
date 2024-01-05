@@ -6,10 +6,32 @@ $GAME_STATUS = [
     'finished' => 2,
 ];
 
+$SHIP_TYPE = [
+    'carrier' => 0,
+    'battleship' => 1,
+    'cruiser' => 2,
+    'submarine' => 3,
+    'destroyer' => 4,
+];
+
+
+$SHIP_SIZE = [
+    'carrier' => 5,
+    'battleship' => 4,
+    'cruiser' => 3,
+    'submarine' => 3,
+    'destroyer' => 2,
+];
+
+$SHIP_ORIENTATION = [
+    'horizontal' => 0,
+    'vertical' => 1,
+];
+
 function getActiveGame($db, $user_id) {
     global $GAME_STATUS;
-    $stmt = $db->prepare("SELECT id, player_1 FROM game_session where player_1=? and game_phase=" . $GAME_STATUS['finished']);
-    $stmt->bind_param('s', $user_id);
+    $stmt = $db->prepare("SELECT * FROM game_session where ( player_1=? or player_2=? )and game_phase !=" . $GAME_STATUS['finished']);
+    $stmt->bind_param('ss', $user_id, $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -100,6 +122,102 @@ function listAvailablePlayers($db, $user_id) {
     return $available_players;
 }
 
+function getShipPlacements($db, $user_id) {
+    $active_game = getActiveGame($db, $user_id);
 
+    if ($active_game == null) {
+        return null;
+    }
+
+    $game_stmt = $db->prepare("SELECT * FROM ship_placement WHERE session = ?");
+    $game_stmt->bind_param('s', $active_game['id']);
+    $game_stmt->execute();
+    $res = $game_stmt->get_result();
+
+    $ship_placements = [];
+
+    $current_placement = $res->fetch_assoc();
+    while($current_placement) {
+        $ship_placements []= $current_placement;
+        $current_placement = $res->fetch_assoc();
+    }
+
+    return $ship_placements;
+}
+
+function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
+    global $GAME_STATUS;
+    global $SHIP_TYPE;
+    global $SHIP_ORIENTATION;
+    global $SHIP_SIZE;
+
+    $active_game = getActiveGame($db, $user_id);
+
+    if (!$active_game) {
+        return null;
+    }
+
+    if (!$active_game || $active_game['game_phase'] != $GAME_STATUS['initialized']) {
+        return null;
+    }
+
+    // get current board
+    $current_placements = getShipPlacements($db, $user_id);
+    $player_placements = [];
+    foreach ($current_placements as $current_placement) {
+        if ($current_placement['player'] == $user_id) {
+            $player_placements []= $current_placement;
+        }
+    }
+
+    // validate placement
+    $is_valid = true;
+    $validation_error = null;
+    foreach ($player_placements as $player_placement) {
+        if ($player_placement['ship_type'] == $ship_type) {
+            $is_valid = false;
+            $validation_error = "Ship '$ship_type' has already been placed";
+            break;
+        }
+
+        if ($orientation == 'horizontal') {
+            if ($y == $player_placement['y'] && $x >= $player_placement['x'] && $x <= $player_placement['x'] + $SHIP_SIZE[$ship_type]) {
+                $is_valid = false;
+                $validation_error = "Ship '$ship_type' conflicts on x = $x with other ship";
+                break;
+            }
+        } else {
+            if ($x == $player_placement['x'] && $y >= $player_placement['y'] && $y <= $player_placement['y'] + $SHIP_SIZE[$ship_type]) {
+                $is_valid = false;
+                $validation_error = "Ship '$ship_type' conflicts on y = $y with other ship";
+                break;
+            }
+        }
+    }
+
+    if (!$is_valid) {
+        return [
+            'is_valid' => $is_valid,
+            'validation_error' => $validation_error,
+        ];
+    }
+
+    // place ship
+    $stmt = $db->prepare("INSERT INTO ship_placement (session, player, date, ship_type, x, y, orientation) VALUES (?, ?, CURRENT_DATE, ?, ?, ?, ?)");
+    $stmt->bind_param('ssssss', $active_game['id'], $user_id, $SHIP_TYPE[$ship_type], $x, $y, $SHIP_ORIENTATION[$orientation]);
+    $stmt->execute();
+}
+
+function getBoardStatus($db, $user_id) {
+    $active_game = getActiveGame($db, $user_id);
+
+    if (!$active_game) {
+        return null;
+    }
+
+
+
+
+}
 
 ?>
