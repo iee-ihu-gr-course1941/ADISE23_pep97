@@ -14,8 +14,9 @@ CREATE TABLE game_session (
     id INT AUTO_INCREMENT PRIMARY KEY,
     player_1 int NOT NULL,
     player_2 INT,
-    finished INT DEFAULT(0) NOT NULL,
-    date_started DATE NOT NULL,
+    game_phase INT DEFAULT(0) NOT NULL,
+    winner INT,
+    date_started DATETIME NOT NULL,
     FOREIGN KEY (player_1) REFERENCES user(id),
     FOREIGN KEY (player_2) REFERENCES user(id)
 );

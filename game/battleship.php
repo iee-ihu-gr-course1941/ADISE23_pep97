@@ -1,7 +1,14 @@
 <?php
 
+$GAME_STATUS = [
+    'initialized' => 0,
+    'started' => 1,
+    'finished' => 2,
+];
+
 function getActiveGame($db, $user_id) {
-    $stmt = $db->prepare("SELECT id, player_1 FROM game_session where player_1=? and finished=0");
+    global $GAME_STATUS;
+    $stmt = $db->prepare("SELECT id, player_1 FROM game_session where player_1=? and finished=" . $GAME_STATUS['finished']);
     $stmt->bind_param('s', $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -33,7 +40,8 @@ function createNewGame($db, $user_id) {
 }
 
 function listAvailablePlayers($db, $user_id) {
-    $games_query = $db->query("SELECT player_1, player_2 FROM game_session WHERE finished = 0");
+    global $GAME_STATUS;
+    $games_query = $db->query("SELECT player_1, player_2 FROM game_session WHERE game_phase != " . $GAME_STATUS['finished']);
     $active_games = $games_query->fetch_all();
     $busy_users = [];
 
@@ -46,8 +54,14 @@ function listAvailablePlayers($db, $user_id) {
 
     $concatenated_numbers = implode(', ', $busy_users);
 
+    if (sizeof($busy_users) > 0) {
+      $sql_query = "SELECT id, username FROM user WHERE id != ? and id not in ($concatenated_numbers)";
+    } else {
+        $sql_query = "SELECT id, username FROM user WHERE id != ?";
+    }
 
-    $stmt = $db->prepare("SELECT id, username FROM user WHERE id != ? and id not in ($concatenated_numbers)");
+
+    $stmt = $db->prepare($sql_query);
     $stmt->bind_param('s', $user_id);
     $stmt->execute();
     $res = $stmt->get_result();
