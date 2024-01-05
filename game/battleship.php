@@ -8,7 +8,7 @@ $GAME_STATUS = [
 
 function getActiveGame($db, $user_id) {
     global $GAME_STATUS;
-    $stmt = $db->prepare("SELECT id, player_1 FROM game_session where player_1=? and finished=" . $GAME_STATUS['finished']);
+    $stmt = $db->prepare("SELECT id, player_1 FROM game_session where player_1=? and game_phase=" . $GAME_STATUS['finished']);
     $stmt->bind_param('s', $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -21,9 +21,32 @@ function getActiveGame($db, $user_id) {
     }
 }
 
-function createNewGame($db, $user_id) {
-    $stmt = $db->prepare("INSERT INTO game_session (player_1, date_started) VALUES (?, CURRENT_TIMESTAMP)");
-    $stmt->bind_param('s', $user_id);
+function createNewGame($db, $user_id, $second_player) {
+
+    // check if the current player is available
+    global $GAME_STATUS;
+    $player_1_games = $db->query("SELECT player_1 FROM game_session WHERE game_phase != " . $GAME_STATUS['finished']);
+    $player_1_active_games = $player_1_games->fetch_all();
+
+    if (sizeof($player_1_active_games) > 0) {
+        return null;
+    }
+
+    // check if the second player is available for the game
+    $available_players = listAvailablePlayers($db, $user_id);
+    $player_2_is_available = false;
+    foreach ($available_players as $available_player) {
+        if ($available_player['id'] == $second_player) {
+            $player_2_is_available = true;
+        }
+    }
+
+    if (!$player_2_is_available) {
+        return null;
+    }
+
+    $stmt = $db->prepare("INSERT INTO game_session (player_1, player_2, date_started) VALUES (?, ?, CURRENT_TIMESTAMP)");
+    $stmt->bind_param('ss', $user_id, $second_player);
     $stmt->execute();
 
     $new_game_id = $stmt->insert_id;
@@ -76,5 +99,7 @@ function listAvailablePlayers($db, $user_id) {
 
     return $available_players;
 }
+
+
 
 ?>
