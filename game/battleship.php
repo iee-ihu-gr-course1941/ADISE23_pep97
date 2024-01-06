@@ -47,6 +47,15 @@ function getShipOrientation($orientation) {
     }
 }
 
+function getMaxPoints() {
+    global $SHIP_SIZE;
+    $max_size = 0;
+    foreach ($SHIP_SIZE as $key => $value) {
+        $max_size += $value;
+    }
+
+    return $max_size;
+}
 
 function getActiveGame($db, $user_id) {
     global $GAME_STATUS;
@@ -364,7 +373,8 @@ function playTurn($db, $user_id, $x, $y) {
             }
         }
 
-        if ($totalHits >= 3) {
+        $max_points = getMaxPoints();
+        if ($totalHits >= $max_points) {
             $player_won = true;
         }
     }
