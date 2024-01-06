@@ -72,6 +72,24 @@ function getActiveGame($db, $user_id) {
     }
 }
 
+function getAllPlayerGames($db, $user_id) {
+    $stmt = $db->prepare("SELECT * FROM game_session where ( player_1=? or player_2=? ) ORDER BY date_started ASC");
+    $stmt->bind_param('ss', $user_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $games = [];
+
+    $current_game = $result->fetch_assoc();
+    $games []= $current_game;
+    while ($current_game) {
+        $current_game = $result->fetch_assoc();
+        $games []= $current_game;
+    }
+
+    return $games;
+}
+
 function createNewGame($db, $user_id, $second_player) {
 
     // check if the current player is available
