@@ -28,6 +28,26 @@ $SHIP_ORIENTATION = [
     'vertical' => 1,
 ];
 
+function getShipType($type) {
+    global $SHIP_TYPE;
+    foreach ($SHIP_TYPE as $key => $value) {
+        if ($type == $value) {
+            return $key;
+        }
+    }
+    return null;
+}
+
+function getShipOrientation($orientation) {
+    global $SHIP_ORIENTATION;
+    foreach ($SHIP_ORIENTATION as $key => $value) {
+        if ($orientation == $value) {
+            return $key;
+        }
+    }
+}
+
+
 function getActiveGame($db, $user_id) {
     global $GAME_STATUS;
     $stmt = $db->prepare("SELECT * FROM game_session where ( player_1=? or player_2=? )and game_phase !=" . $GAME_STATUS['finished']);
@@ -256,8 +276,111 @@ function markPlayerReady($db, $user_id) {
     return $result;
 }
 
-function start_game($db, $user_id) {
+function getRoundActions($db, $user_id) {
+    $active_game = getActiveGame($db, $user_id);
 
+    if ($active_game == null) {
+        return null;
+    }
+
+    $game_stmt = $db->prepare("SELECT * FROM round_action WHERE session = ? ORDER BY date ASC");
+    $game_stmt->bind_param('s', $active_game['id']);
+    $game_stmt->execute();
+    $res = $game_stmt->get_result();
+
+    $round_actions = [];
+
+    $current_action = $res->fetch_assoc();
+    while($current_action) {
+        $round_actions []= $current_action;
+        $current_action = $res->fetch_assoc();
+    }
+
+    return $round_actions;
+}
+
+function playTurn($db, $user_id, $x, $y) {
+    // get active game
+    global $GAME_STATUS;
+    global $SHIP_SIZE;
+
+
+    $active_game = getActiveGame($db, $user_id);
+
+    if (!$active_game) {
+        return null;
+    }
+    // validate if player can play
+    print($active_game['round']);
+    if ($active_game['player_1'] == $user_id && $active_game['round'] % 2 == 1) {
+        return null;
+    } else if ($active_game['player_2'] == $user_id  && $active_game['round'] % 2 == 0) {
+        return null;
+    }
+
+    // validate coordinates
+    $actions = getRoundActions($db, $user_id);
+
+    foreach ($actions as $action) {
+        // check if the player has already played the move
+        if ($action['player'] == $user_id && $action['x'] == $x && $action['y'] == $y) {
+            return null;
+        }
+    }
+
+    // determine if hit
+    $placements = getShipPlacements($db, $user_id);
+    $hit = false;
+    foreach ($placements as $placement) {
+        if ($placement['player'] != $user_id) {
+            $ship_type = getShipType($placement['ship_type']);
+            $orientation = getShipOrientation($placement['orientation']);
+
+            if ($orientation == 'horizontal') {
+                if ($y == $placement['y'] && $x >= $placement['x'] && $x <= $placement['x'] + $SHIP_SIZE[$ship_type]) {
+                    $hit = true;
+                    break;
+                }
+            } else {
+                if ($x == $placement['x'] && $y >= $placement['y'] && $y <= $placement['y'] + $SHIP_SIZE[$ship_type]) {
+                    $hit = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // set result
+    $stmt = $db->prepare("INSERT INTO round_action (session, player, date, round, x, y, hit) VALUES (?, ?, NOW(), ?, ?, ?, ?)");
+    $stmt->bind_param('iisssi', $active_game['id'], $user_id, $active_game['round'], $x, $y, $hit);
+    $stmt->execute();
+
+    $player_won = false;
+    if ($hit) {
+        $totalHits = 0;
+        foreach ($actions as $action) {
+            if ($action['player'] == $user_id && $action['hit']) {
+                    $totalHits++;
+            }
+        }
+
+        if ($totalHits >= 3) {
+            $player_won = true;
+        }
+    }
+
+    if ($player_won) {
+        $stmt = $db->prepare("UPDATE game_session SET game_phase = ?, winner = ? WHERE id = ?");
+        $stmt->bind_param('iii', $GAME_STATUS['finished'], $user_id, $active_game['id']);
+        $stmt->execute();
+    } else {
+        $new_round =  $active_game['round'] + 1;
+        $stmt = $db->prepare("UPDATE game_session SET round = ? WHERE id = ?");
+        $stmt->bind_param('ii', $new_round, $active_game['id']);
+        $stmt->execute();
+    }
+
+    return $hit;
 }
 
 function getBoardStatus($db, $user_id) {

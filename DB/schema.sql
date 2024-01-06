@@ -16,6 +16,7 @@ CREATE TABLE game_session (
     player_2 INT,
     game_phase INT DEFAULT(0) NOT NULL,
     winner INT,
+    round INT NOT NULL,
     date_started DATETIME NOT NULL,
     player_1_ready INT NOT NULL DEFAULT (0),
     player_2_ready INT NOT NULL DEFAULT (0),
@@ -41,8 +42,10 @@ CREATE TABLE round_action (
     session INT NOT NULL,
     round INT NOT NULL,
     player INT NOT NULL,
+    hit INT NOT NULL DEFAULT(0),
     date DATETIME NOT NULL,
     x INT NOT NULL,
     y INT NOT NULL,
-    FOREIGN KEY (session) REFERENCES game_session(id)
+    FOREIGN KEY (session) REFERENCES game_session(id),
+    FOREIGN KEY (player) REFERENCES user(id)
 );
