@@ -16,7 +16,7 @@ CREATE TABLE game_session (
     player_2 INT,
     game_phase INT DEFAULT(0) NOT NULL,
     winner INT,
-    round INT NOT NULL,
+    round INT NOT NULL DEFAULT(0),
     date_started DATETIME NOT NULL,
     player_1_ready INT NOT NULL DEFAULT (0),
     player_2_ready INT NOT NULL DEFAULT (0),
