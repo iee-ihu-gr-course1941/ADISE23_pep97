@@ -18,12 +18,16 @@ ADISE NAVMAXIA 2023
 
 ## API
 
+The API main URL is at https://users.iee.ihu.gr/~it154522/ADISE23_pep97
+
+You can use the following requests for using the API
+
 ### Users
 
 #### Create
 
 ```shell
-curl --location 'http://localhost/auth/register.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/register.php' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "user01",
@@ -34,7 +38,7 @@ curl --location 'http://localhost/auth/register.php' \
 #### Login
 
 ```shell
-curl --location 'http://localhost/auth/login.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/login.php' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "user01",
@@ -45,7 +49,7 @@ curl --location 'http://localhost/auth/login.php' \
 #### Logout
 
 ```shell
-curl --location --request POST 'http://localhost/auth/logout.php' \
+curl --location --request POST 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/logout.php' \
 --header 'Cookie: PHPSESSID=....'
 ```
 
@@ -56,7 +60,7 @@ curl --location --request POST 'http://localhost/auth/logout.php' \
 #### Get available players
 
 ```shell
-curl --location 'http://localhost/game/available-players.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/available-players.php' \
 --header 'Cookie: PHPSESSID=...'
 ```
 
@@ -65,7 +69,7 @@ curl --location 'http://localhost/game/available-players.php' \
 player_2: The id of the other player
 
 ```shell
-curl --location 'http://localhost/game/initialize.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/initialize.php' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: PHPSESSID=...' \
 --data '{
@@ -79,7 +83,7 @@ curl --location 'http://localhost/game/initialize.php' \
 You should have placed all the ships, before marking the player as ready
 
 ```shell
-curl --location --request POST 'http://localhost/game/player-ready.php' \
+curl --location --request POST 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/player-ready.php' \
 --header 'Cookie: PHPSESSID=...'
 ```
 
@@ -94,7 +98,7 @@ orientation: 'horizontal' or 'vertical'
 ship_type: 'carrier', 'battleship', 'cruiser', 'submarine', 'destroyer'
 
 ```shell
-curl --location 'http://localhost/game/place-ship.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/place-ship.php' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: PHPSESSID=...' \
 --data '{
@@ -115,7 +119,7 @@ x: 1 -10
 y: 1 - 10
 
 ```shell
-curl --location 'http://localhost/game/execute-turn.php' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/execute-turn.php' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: PHPSESSID=...' \
 --data '{
@@ -127,6 +131,6 @@ curl --location 'http://localhost/game/execute-turn.php' \
 
 #### Read board status
 ```shell
-curl --location 'http://localhost/game/board-status.php?active=false' \
+curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/board-status.php?active=false' \
 --header 'Cookie: PHPSESSID=...'
 ```
