@@ -1,10 +1,11 @@
 <?php
-$host='mariadb';
-$db = 'adise_battleship';
+
 require_once "../config_local.php";
 
 $user=$DB_USER;
 $pass=$DB_PASS;
+$host=$DB_HOST;
+$db=$DB_NAME;
 
 
 if(gethostname()=='users.iee.ihu.gr') {

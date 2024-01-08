@@ -4,7 +4,7 @@ ADISE NAVMAXIA 2023
 ## Configure
 
 1. create the file "config_local.php" at the project root
-2. Declare the variables `$DB_USER` and `$DB_PASS`
+2. Declare the variables `$DB_USER`, `$DB_PASS`, `$DB_HOST`, `$DB_NAME`
 3. Create the database `adise_battleship`
 4. Run the sql script found at DB/schema.sql
 
