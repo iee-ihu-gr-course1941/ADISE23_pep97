@@ -1,6 +1,6 @@
 <?php
 
-require_once "../lib/db_connect.php";
+require_once "lib/db_connect.php";
 require_once "battleship.php";
 
 session_start();
