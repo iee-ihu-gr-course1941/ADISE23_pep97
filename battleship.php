@@ -335,14 +335,22 @@ function playTurn($db, $user_id, $x, $y) {
     $active_game = getActiveGame($db, $user_id);
 
     if (!$active_game) {
-        return null;
+        return [
+            'hit' => false,
+            'error' => "No active game",
+        ];
     }
     // validate if player can play
-    print($active_game['round']);
     if ($active_game['player_1'] == $user_id && $active_game['round'] % 2 == 1) {
-        return null;
+        return [
+            'hit' => false,
+            'error' => "player 1 can not play on odd rounds",
+        ];
     } else if ($active_game['player_2'] == $user_id  && $active_game['round'] % 2 == 0) {
-        return null;
+        return [
+            'hit' => false,
+            'error' => "player 2 can not play on even rounds",
+        ];
     }
 
     // validate coordinates
@@ -351,7 +359,10 @@ function playTurn($db, $user_id, $x, $y) {
     foreach ($actions as $action) {
         // check if the player has already played the move
         if ($action['player'] == $user_id && $action['x'] == $x && $action['y'] == $y) {
-            return null;
+            return [
+                'hit' => false,
+                'error' => "player has already played the move",
+            ];
         }
     }
 
@@ -408,7 +419,10 @@ function playTurn($db, $user_id, $x, $y) {
         $stmt->execute();
     }
 
-    return $hit;
+    return [
+        'hit' => $hit,
+        'error' => null,
+    ];
 }
 
 function getBoardStatus($db, $user_id) {

@@ -34,12 +34,12 @@ if (!array_key_exists('user', $_SESSION)) {
         $response['status'] = 'ok';
         $turnResult = playTurn($mysqli, $_SESSION['user']['id'], $request_data['x'], $request_data['y']);
 
-        if ($turnResult == null) {
+        if ($turnResult['error'] != null) {
             $response['status'] = 'error';
-            $response['data'] = "Could not execute turn";
+            $response['data'] = $turnResult['error'];
         } else {
             $response['data'] = [
-                'hit' => $turnResult,
+                'hit' => $turnResult['hit'],
             ];
         }
     }
