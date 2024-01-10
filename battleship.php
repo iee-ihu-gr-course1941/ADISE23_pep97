@@ -176,8 +176,8 @@ function getShipPlacements($db, $user_id) {
         return null;
     }
 
-    $game_stmt = $db->prepare("SELECT * FROM ship_placement WHERE session = ? AND player = ?");
-    $game_stmt->bind_param('ii', $active_game['id'], $user_id);
+    $game_stmt = $db->prepare("SELECT * FROM ship_placement WHERE session = ?");
+    $game_stmt->bind_param('i', $active_game['id']);
     $game_stmt->execute();
     $res = $game_stmt->get_result();
 
@@ -289,7 +289,14 @@ function markPlayerReady($db, $user_id) {
 
     $placements = getShipPlacements($db, $user_id);
 
-    if (sizeof($placements) < 5) {
+    $ownPlacements = [];
+    foreach ($placements as $placement) {
+        if ($placement['player'] == $user_id) {
+            $ownPlacements []= $placement;
+        }
+    }
+
+    if (sizeof($ownPlacements) < 5) {
         return null;
     }
 
