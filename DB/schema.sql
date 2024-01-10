@@ -16,10 +16,13 @@ CREATE TABLE game_session (
     player_2 INT,
     game_phase INT DEFAULT(0) NOT NULL,
     winner INT,
+    terminated_by INT,
     round INT NOT NULL DEFAULT(0),
     date_started DATETIME NOT NULL,
     player_1_ready INT NOT NULL DEFAULT (0),
     player_2_ready INT NOT NULL DEFAULT (0),
+    FOREIGN KEY (winner) REFERENCES user(id),
+    FOREIGN KEY (terminated_by) REFERENCES user(id),
     FOREIGN KEY (player_1) REFERENCES user(id),
     FOREIGN KEY (player_2) REFERENCES user(id)
 );

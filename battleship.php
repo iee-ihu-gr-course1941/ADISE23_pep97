@@ -176,8 +176,8 @@ function getShipPlacements($db, $user_id) {
         return null;
     }
 
-    $game_stmt = $db->prepare("SELECT * FROM ship_placement WHERE session = ?");
-    $game_stmt->bind_param('s', $active_game['id']);
+    $game_stmt = $db->prepare("SELECT * FROM ship_placement WHERE session = ? AND player = ?");
+    $game_stmt->bind_param('ii', $active_game['id'], $user_id);
     $game_stmt->execute();
     $res = $game_stmt->get_result();
 
@@ -425,12 +425,18 @@ function playTurn($db, $user_id, $x, $y) {
     ];
 }
 
-function getBoardStatus($db, $user_id) {
-    $active_game = getActiveGame($db, $user_id);
+function terminateGame($db, $user_id) {
 
+    global $GAME_STATUS;
+
+    $active_game = getActiveGame($db, $user_id);
     if (!$active_game) {
         return null;
     }
-}
 
-?>
+    $stmt = $db->prepare("UPDATE game_session set game_phase = ?, terminated_by = ? WHERE id = ?");
+    $stmt->bind_param('iii', $GAME_STATUS['finished'], $user_id, $active_game['id']);
+    $stmt->execute();
+
+    return $stmt;
+}

@@ -134,3 +134,12 @@ curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/execute-turn.p
 curl --location 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/board-status.php?active=false' \
 --header 'Cookie: PHPSESSID=...'
 ```
+
+
+#### Terminate a game
+
+```shell
+curl --location --request POST 'https://users.iee.ihu.gr/~it154522/ADISE23_pep97/terminate-game.php' \
+--header 'Cookie: PHPSESSID=...'
+'
+```

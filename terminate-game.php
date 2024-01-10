@@ -12,12 +12,18 @@ $response = [
 
 if (!array_key_exists('user', $_SESSION)) {
     $response['data'] = 'Not authenticated';
-} else if ($_SERVER['REQUEST_METHOD'] != 'GET') {
+} else if ($_SERVER['REQUEST_METHOD'] != 'POST') {
     $response['status'] = 'error';
     $response['data'] = 'Not supported method';
 } else {
-    $response['status'] = 'ok';
-    $response['data'] = listAvailablePlayers($mysqli, $_SESSION['user']['id']);
+    $result = terminateGame($mysqli, $_SESSION['user']['id']);
+    if ($result != null) {
+        $response['status'] = 'ok';
+        $response['data'] = 'Game terminated';
+    } else {
+        $response['status'] = 'error';
+        $response['data'] = 'There is no active game';
+    }
 }
 
 $mysqli->close();
