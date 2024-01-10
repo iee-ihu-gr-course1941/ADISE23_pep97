@@ -226,6 +226,23 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
     // validate placement
     $is_valid = true;
     $validation_error = null;
+
+    if ($orientation == 'horizontal') {
+        if ($x + $SHIP_SIZE[$ship_type] > 10) {
+            return [
+                'is_valid' => false,
+                'validation_error' => "Ship '$ship_type' out of range",
+            ];
+        }
+    } else {
+        if ($y + $SHIP_SIZE[$ship_type] > 10) {
+            return [
+                'is_valid' => false,
+                'validation_error' => "Ship '$ship_type' out of range",
+            ];
+        }
+    }
+
     foreach ($player_placements as $player_placement) {
         if ($player_placement['ship_type'] == $SHIP_TYPE[$ship_type]) {
             $is_valid = false;
@@ -234,24 +251,12 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
         }
 
         if ($orientation == 'horizontal') {
-            if ($x + $SHIP_SIZE[$ship_type] > 10) {
-                $is_valid = false;
-                $validation_error = "Ship '$ship_type' out of range";
-                break;
-            }
-
             if ($y == $player_placement['y'] && $x >= $player_placement['x'] && $x <= $player_placement['x'] + $SHIP_SIZE[$ship_type]) {
                 $is_valid = false;
                 $validation_error = "Ship '$ship_type' conflicts on x = $x with other ship";
                 break;
             }
         } else {
-            if ($y + $SHIP_SIZE[$ship_type] > 10) {
-                $is_valid = false;
-                $validation_error = "Ship '$ship_type' out of range";
-                break;
-            }
-
             if ($x == $player_placement['x'] && $y >= $player_placement['y'] && $y <= $player_placement['y'] + $SHIP_SIZE[$ship_type]) {
                 $is_valid = false;
                 $validation_error = "Ship '$ship_type' conflicts on y = $y with other ship";
