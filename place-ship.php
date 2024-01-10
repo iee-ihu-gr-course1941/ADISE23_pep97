@@ -43,8 +43,15 @@ if (!array_key_exists('user', $_SESSION)) {
         $response['status'] = 'error';
         $response['data'] = "Param 'ship_type' is " . $request_data['ship_type'] . "but it can only by 'carrier', 'battleship', 'cruiser', 'submarine' or 'destroyer'";
     } else {
-        $response['status'] = 'ok';
-        $response['data'] = placeShip($mysqli, $_SESSION['user']['id'], $request_data['ship_type'], $request_data['x'], $request_data['y'], $request_data['orientation']);
+        $result = placeShip($mysqli, $_SESSION['user']['id'], $request_data['ship_type'], $request_data['x'], $request_data['y'], $request_data['orientation']);
+
+        if (!$result['is_valid']) {
+            $response['status'] = 'error';
+            $response['data'] = $result['validation_error'];
+        } else {
+            $response['status'] = 'ok';
+            $response['data'] = $result;
+        }
     }
 }
 

@@ -201,11 +201,17 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
     $active_game = getActiveGame($db, $user_id);
 
     if (!$active_game) {
-        return null;
+        return [
+            'is_valid' => false,
+            'validation_error' => "There is no active game",
+        ];
     }
 
     if (!$active_game || $active_game['game_phase'] != $GAME_STATUS['initialized']) {
-        return null;
+        return [
+            'is_valid' => false,
+            'validation_error' => "The game has already started",
+        ];
     }
 
     // get current board
@@ -265,6 +271,11 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
     $stmt = $db->prepare("INSERT INTO ship_placement (session, player, date, ship_type, x, y, orientation) VALUES (?, ?, CURRENT_DATE, ?, ?, ?, ?)");
     $stmt->bind_param('ssssss', $active_game['id'], $user_id, $SHIP_TYPE[$ship_type], $x, $y, $SHIP_ORIENTATION[$orientation]);
     $stmt->execute();
+
+    return [
+        'is_valid' => true,
+        'validation_error' => "Ship $ship_type placed on x = $x and y = $y",
+    ];
 }
 
 function markPlayerReady($db, $user_id) {
