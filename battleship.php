@@ -228,14 +228,14 @@ function placeShip($db, $user_id, $ship_type, $x, $y, $orientation) {
     $validation_error = null;
 
     if ($orientation == 'horizontal') {
-        if ($x + $SHIP_SIZE[$ship_type] > 10) {
+        if ($x + $SHIP_SIZE[$ship_type] - 1 > 10) { // first square is included
             return [
                 'is_valid' => false,
                 'validation_error' => "Ship '$ship_type' out of range",
             ];
         }
     } else {
-        if ($y + $SHIP_SIZE[$ship_type] > 10) {
+        if ($y + $SHIP_SIZE[$ship_type] - 1 > 10) { // first square is included
             return [
                 'is_valid' => false,
                 'validation_error' => "Ship '$ship_type' out of range",
